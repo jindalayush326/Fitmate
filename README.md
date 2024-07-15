@@ -3,9 +3,9 @@ Personalized Fitness Guidance through my chatbot
 
 ### Weblink: [Live Website]()
 ## Some Images:
-<img width="450px;" src="https://github.com/jindalayush326/Fitmate/images/first.png"/>
-<img width="450px;" src="https://github.com/jindalayush326/Fitmate/images/second.png"/>
-<img width="450px;" src="https://github.com/jindalayush326/Fitmate/images/third.png"/>
+<img src="https://github.com/jindalayush326/Fitmate/images/first.png"/>
+<img src="https://github.com/jindalayush326/Fitmate/images/second.png"/>
+<img src="https://github.com/jindalayush326/Fitmate/images/third.png"/>
 
 
 ## Table of Contents
