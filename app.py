@@ -20,7 +20,7 @@ load_dotenv()
 secret_key = secrets.token_hex(16)
 app = Flask(__name__)
 app.secret_key = secret_key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///messages.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL")
 db = SQLAlchemy(app)
 
 # Initialize Firebase Admin SDK
