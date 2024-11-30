@@ -24,7 +24,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL")
 db = SQLAlchemy(app)
 
 # Initialize Firebase Admin SDK
-cred = credentials.Certificate("D:/ml/gemini/personality_prediction/aftr-integrated/aftr/aftr/serviceAccountKey.json")  
+cred = credentials.Certificate("serviceAccountKey.json")  
 firebase_admin.initialize_app(cred)
 
 # gets API Key from environment variable OPENAI_API_KEY
