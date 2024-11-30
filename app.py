@@ -24,7 +24,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///messages.db'
 db = SQLAlchemy(app)
 
 # Initialize Firebase Admin SDK
-cred = credentials.Certificate("D:/ml/gemini/personality_prediction/aftr-integrated/aftr/aftr/serviceAccountKey.json")  # Replace with your service account key path
+cred = credentials.Certificate("D:/ml/gemini/personality_prediction/aftr-integrated/aftr/aftr/serviceAccountKey.json")  
 firebase_admin.initialize_app(cred)
 
 # gets API Key from environment variable OPENAI_API_KEY
@@ -172,29 +172,24 @@ def upload():
     
     # Define the input prompt template for Gemini
     input_prompt_template = f"""
-    You are an expert in detection of personality where you need to see all the images of a person that the user inputs and classify the content of the image to provide insights about the person's interests, hobbies, clothing, and personality traits.
+    You are an expert in detecting personality traits and fitness levels. Upon receiving an image of a person, you need to analyze it to classify the individual’s fitness level (beginner, intermediate, or expert) for gym membership suitability, along with other insights such as their interests, hobbies, clothing, and personality traits.
+
+    It is impossible to determine fitness level, BMI, personality traits, interests, or hobbies from a single image. However, based on the person’s appearance, you will make educated guesses, and for further analysis, we ask for the user’s weight and height to calculate BMI and refine the suggestions.
 
     However, I need more information about the person in the image to provide accurate insights. Could you please provide the following details:
-        
-    1. Name of the person
-    2. Gender (if identifiable)
-    3. Age group
-    4. Any additional information you think might be relevant
 
-    For fitness enthusiasts:
-    5. Fitness Goals
-    6. Current Fitness Level
-    7. Exercise Preferences
-    8. Dietary Preferences
-    9. Any existing health conditions or limitations
+    Name of the person
+    Gender (if identifiable)
+    Age group
+    Additional information related to their fitness journey and interests
 
-    Please provide the information in the following format:
-    
     Name: {user_info_name}
     Gender: [Gender]
     Age: [Age]
     Additional Information: {user_info_for_additional_info}
     Fitness Information:
+
+    Fitness Level: [Beginner/Intermediate/Expert based on the analysis of the image and BMI]
     Fitness Goals: [Fitness Goals]
     Current Fitness Level: [Fitness Level]
     Exercise Preferences: [Exercise Preferences]
@@ -206,7 +201,8 @@ def upload():
     response_text = get_gemini_response(input_prompt_template, image_parts_list, input_prompt_template)
     
     # Set the system message based on the Gemini response
-    print(response_text)
+    print("Terminal Output: ")
+    print(f"Bot has received image analysis and determined: {response_text}")
     session['system_message'] = response_text
     flash('System message set successfully!')
     
@@ -216,6 +212,11 @@ def upload():
 # Define the route for sending messages
 @app.route('/send_message', methods=['POST'])
 def send_message():
+    # Check if 'system_message' exists in session
+    if 'system_message' not in session:
+        flash("System message not set. Please upload an image first.")
+        return redirect(url_for('image'))  # Redirect to the image upload page to set the system message
+
     user_message = request.form['message']
     messages = session.get('conversation', [])
     messages.append({"role": "user", "content": user_message})
@@ -225,14 +226,14 @@ def send_message():
     db.session.add(user_msg)
     db.session.commit()
     
-     # Handle fitness-related queries
+    # Handle fitness-related queries
     if "workout" in user_message.lower() or "diet" in user_message.lower() or "fitness" in user_message.lower():
         fitness_response = get_fitness_response(user_message)
         messages.append({"role": "assistant", "content": fitness_response})
         session['conversation'] = messages
         return {'assistant': fitness_response}
     
-    
+    # Generate the assistant's response based on the system message and conversation
     response = client.chat.completions.create(
         model="mistralai/mixtral-8x7b-instruct",
         messages=[{"role": "system", "content": session['system_message']}] + messages,
@@ -247,6 +248,7 @@ def send_message():
     db.session.commit()
 
     return {'assistant': assistant_message}
+
 
 def get_fitness_response(user_message):
     # Construct the URL for querying the fitness API
