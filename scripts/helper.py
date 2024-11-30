@@ -16,8 +16,8 @@ def process_images(uploaded_files):
     return image_parts_list
 
 
-# Helper function to get Gemini response
+# Helper function to get Gemini response with the updated model
 def get_gemini_response(input_text, image_parts, prompt):
-    model = genai.GenerativeModel('gemini-pro-vision')
+    model = genai.GenerativeModel('gemini-1.5-pro')
     response = model.generate_content([input_text, *image_parts, prompt])
     return response.text
